@@ -1,67 +1,81 @@
 const API_URL = '98.93.14.4';
 
-async function loadProducts() {
-    const response = await fetch(`${API_URL}/products`);
-    const products = await response.json();
-    const list = document.getElementById('productList');
-    list.innerHTML = '';
-    products.forEach(product => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-      <strong>${product.name}</strong> - ${product.description} - R$ ${product.price}
-      <button class="update-btn" onclick="editProduct(${product.id}, '${product.name}', '${product.description}', ${product.price})">Editar</button>
-      <button class="delete-btn" onclick="deleteProduct(${product.id})">Deletar</button>
-    `;
-        list.appendChild(li);
+const productList = document.querySelector('#products');
+const addProductForm = document.querySelector('#add-product-form');
+const updateProductForm = document.querySelector('#update-product-form');
+const updateProductId = document.querySelector('#update-id');
+const updateProductName = document.querySelector('#update-name');
+const updateProductPrice = document.querySelector('#update-price');
+
+async function fetchProducts() {
+  const response = await fetch(`${API_URL}/products/`);
+  const products = await response.json();
+
+  // Clear product list
+  productList.innerHTML = '';
+
+  // Add each product to the list
+  products.forEach(product => {
+    const li = document.createElement('li');
+    li.innerHTML = `${product.name} - $${product.price}`;
+
+    // Add delete button for each product
+    const deleteButton = document.createElement('button');
+    deleteButton.innerHTML = 'Delete';
+    deleteButton.addEventListener('click', async () => {
+      await deleteProduct(product.id);
+      await fetchProducts();
     });
+    li.appendChild(deleteButton);
+
+    // Add update button for each product
+    const updateButton = document.createElement('button');
+    updateButton.innerHTML = 'Update';
+    updateButton.addEventListener('click', () => {
+      updateProductId.value = product.id;
+      updateProductName.value = product.name;
+      updateProductPrice.value = product.price;
+    });
+    li.appendChild(updateButton);
+
+    productList.appendChild(li);
+  });
 }
 
-async function getProductById() {
-    const id = document.getElementById('searchId').value;
-    const response = await fetch(`${API_URL}/products/${id}`);
-    const product = await response.json();
-    const details = document.getElementById('productDetails');
-    details.innerHTML = product ? `<p><strong>${product.name}</strong> - ${product.description} - R$ ${product.price}</p>` : '<p>Produto não encontrado.</p>';
-}
 
-async function editProduct(id, name, description, price) {
-    const newName = prompt('Novo nome:', name);
-    const newDescription = prompt('Nova descrição:', description);
-    const newPrice = prompt('Novo preço:', price);
-    if (newName && newDescription && newPrice) {
-        await fetch(`${API_URL}/products/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: newName, description: newDescription, price: parseFloat(newPrice) })
-        });
-        loadProducts();
-    }
-}
-
-async function deleteProduct(id) {
-    await fetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
-    loadProducts();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('createForm');
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('name').value;
-            const description = document.getElementById('description').value;  // Incluindo descrição
-            const price = document.getElementById('price').value;
-            await fetch(`${API_URL}/products`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, description, price })
-            });
-            loadProducts();
-            e.target.reset();
-        });
-    } else {
-        console.warn('createForm not found in DOM');
-    }
-
-    loadProducts();
+// Event listener for Add Product form submit button
+addProductForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  const name = addProductForm.elements['name'].value;
+  const price = addProductForm.elements['price'].value;
+  await addProduct(name, price);
+  addProductForm.reset();
+  await fetchProducts();
 });
+
+// Function to add a new product
+async function addProduct(name, price) {
+  const response = await fetch(`${API_URL}/products/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name, price })
+  });
+  return response.json();
+}
+
+// Function to delete a new product
+async function deleteProduct(id) {
+  const response = await fetch(`${API_URL}/products/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    //body: JSON.stringify({id})
+  });
+  return response.json();
+}
+
+// Fetch all products on page load
+fetchProducts();
