@@ -1,6 +1,5 @@
-const API_URL = '98.93.14.4';  // Substitua pelo IP da VM do Back End
+const API_URL = '98.93.14.4';
 
-// Carregar produtos
 async function loadProducts() {
     const response = await fetch(`${API_URL}/products`);
     const products = await response.json();
@@ -17,7 +16,6 @@ async function loadProducts() {
     });
 }
 
-// Consultar por ID
 async function getProductById() {
     const id = document.getElementById('searchId').value;
     const response = await fetch(`${API_URL}/products/${id}`);
@@ -26,7 +24,6 @@ async function getProductById() {
     details.innerHTML = product ? `<p><strong>${product.name}</strong> - ${product.description} - R$ ${product.price}</p>` : '<p>Produto não encontrado.</p>';
 }
 
-// Editar produto (botão update)
 async function editProduct(id, name, description, price) {
     const newName = prompt('Novo nome:', name);
     const newDescription = prompt('Nova descrição:', description);
@@ -41,7 +38,6 @@ async function editProduct(id, name, description, price) {
     }
 }
 
-// Deletar produto
 async function deleteProduct(id) {
     await fetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
     loadProducts();
@@ -67,6 +63,5 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('createForm not found in DOM');
     }
 
-    // Carregar produtos após o DOM estar pronto
     loadProducts();
 });
