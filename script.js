@@ -1,4 +1,4 @@
-const API_URL = '44.222.109.169';  // Substitua pelo IP da VM do Back End
+const API_URL = '98.93.14.4/';  // Substitua pelo IP da VM do Back End
 
 // Carregar produtos
 async function loadProducts() {
