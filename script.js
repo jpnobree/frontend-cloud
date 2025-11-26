@@ -17,21 +17,6 @@ async function loadProducts() {
     });
 }
 
-// Criar produto
-document.getElementById('createForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('name').value;
-    const description = document.getElementById('description').value;  // Incluindo descrição
-    const price = document.getElementById('price').value;
-    await fetch(`${API_URL}/products`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description, price })
-    });
-    loadProducts();
-    e.target.reset();
-});
-
 // Consultar por ID
 async function getProductById() {
     const id = document.getElementById('searchId').value;
@@ -62,4 +47,26 @@ async function deleteProduct(id) {
     loadProducts();
 }
 
-loadProducts();  // Carregar na inicialização
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('createForm');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const description = document.getElementById('description').value;  // Incluindo descrição
+            const price = document.getElementById('price').value;
+            await fetch(`${API_URL}/products`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, price })
+            });
+            loadProducts();
+            e.target.reset();
+        });
+    } else {
+        console.warn('createForm not found in DOM');
+    }
+
+    // Carregar produtos após o DOM estar pronto
+    loadProducts();
+});
